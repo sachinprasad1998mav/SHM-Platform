@@ -4,7 +4,6 @@ from .database import Base
 import enum
 from datetime import datetime
 
-# Enums for Type Safety [cite: 120]
 class NodeStatus(enum.Enum):
     NOT_CONFIGURED = "NOT_CONFIGURED"
     CONFIGURED = "CONFIGURED"
@@ -17,7 +16,6 @@ class SubscriptionTier(enum.Enum):
     PRO = "Pro"
     PREMIUM = "Premium"
 
-# The Hierarchy [cite: 107-115]
 class Client(Base):
     __tablename__ = "clients"
     id = Column(Integer, primary_key=True, index=True)
@@ -46,9 +44,9 @@ class Node(Base):
     id = Column(Integer, primary_key=True, index=True)
     zone_id = Column(Integer, ForeignKey("zones.id"))
     status = Column(Enum(NodeStatus), default=NodeStatus.NOT_CONFIGURED)
-    battery_level = Column(Integer, default=100) # [cite: 39]
-    signal_strength = Column(Integer, default=-50) # [cite: 39]
-    last_ping = Column(DateTime, default=datetime.utcnow) # [cite: 39]
+    battery_level = Column(Integer, default=100)
+    signal_strength = Column(Integer, default=-50)
+    last_ping = Column(DateTime, default=datetime.utcnow)
 
     zone = relationship("Zone", back_populates="nodes")
 

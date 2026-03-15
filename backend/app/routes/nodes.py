@@ -19,7 +19,7 @@ def read_nodes(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     return nodes
 
 @router.patch("/{node_id}/ping")
-async def node_ping( # Changed to 'async'
+async def node_ping(
     node_id: int,
     battery: int,
     signal: int,
@@ -29,13 +29,16 @@ async def node_ping( # Changed to 'async'
     if not db_node:
         raise HTTPException(status_code=404, detail="Node not found")
 
-    # 1. Update health metrics in DB
     db_node.battery_level = battery
     db_node.signal_strength = signal
     db_node.last_ping = datetime.utcnow()
     db.commit()
 
-    # 2. Prepare the payload for real-time broadcast
+
+    try:
+        await redis_client.publish("node_updates", json.dumps(update_data))
+    except Exception as e:
+        print(f"⚠️ Redis Broadcast failed: {e}")
     update_data = {
         "id": db_node.id,
         "status": db_node.status.value,
@@ -44,8 +47,6 @@ async def node_ping( # Changed to 'async'
         "last_ping": db_node.last_ping.isoformat()
     }
 
-    # 3. Publish to Redis
-    # We import redis_client here to avoid circular imports
     from ..main import redis_client
     await redis_client.publish("node_updates", json.dumps(update_data))
 
@@ -56,7 +57,6 @@ async def websocket_endpoint(websocket: WebSocket):
     await manager.connect(websocket)
     try:
         while True:
-            # Wait for messages (or just keep connection alive)
             await websocket.receive_text()
     except WebSocketDisconnect:
         manager.disconnect(websocket)
