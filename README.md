@@ -22,3 +22,6 @@ A real-time Structural Health Monitoring (SHM) dashboard built with a high-perfo
 2. **Infrastructure:** - Ensure `redis-server` is running on `localhost:6379`.
 3. **Frontend:**
    - `cd frontend && npm install && npm run dev`
+
+
+   
